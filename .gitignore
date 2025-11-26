@@ -33,3 +33,7 @@ build/
 .vscode/
 
 .env
+
+##manuales
+manual.md
+DER_biblioteca.md
