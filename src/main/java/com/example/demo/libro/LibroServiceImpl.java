@@ -24,9 +24,7 @@ public class LibroServiceImpl implements LibroService{
             throw new IllegalArgumentException("El ISBN ya existe");
         }
 
-        if( libroRepo.existsByAutor(libro.getAutor())){
-            throw new IllegalArgumentException("El autor ya existe");
-        }
+
         return libroRepo.save(libro);
     }
 
@@ -52,10 +50,6 @@ public class LibroServiceImpl implements LibroService{
 
         if( libroRepo.existsByIsbnAndIdNot(libro.getIsbn(), id)){
             throw new IllegalArgumentException("El ISBN ya existe");
-        }
-
-        if( libroRepo.existsByAutorAndIdNot(libro.getAutor(), id)){
-            throw new IllegalArgumentException("El autor ya existe");
         }
 
         libroExistente.setTitulo(libro.getTitulo());

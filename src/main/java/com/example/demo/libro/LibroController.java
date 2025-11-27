@@ -18,9 +18,9 @@ public class LibroController {
     private final LibroService libroService;
 
     @PostMapping
-    public ResponseEntity<LibroApiResponse<Libro>> saveLibro(@Valid @RequestBody Libro libro){
+    public ResponseEntity<ApiResponse<Libro>> saveLibro(@Valid @RequestBody Libro libro){
         Libro newLibro = libroService.save(libro);
-        LibroApiResponse<Libro> response = LibroApiResponse.created(
+        ApiResponse<Libro> response = ApiResponse.created(
                 "Libro creado exitosamente",
                 newLibro
         );
@@ -40,9 +40,9 @@ public class LibroController {
     }
 
     @PutMapping( "/{id}" )
-    public ResponseEntity< LibroApiResponse<Libro>> updateLibro(@PathVariable Long id, @RequestBody Libro libro) {
+    public ResponseEntity<ApiResponse<Libro>> updateLibro(@PathVariable Long id, @RequestBody Libro libro) {
         Libro newLibro = libroService.update(id, libro);
-        LibroApiResponse<Libro> response = LibroApiResponse.ok(
+        ApiResponse<Libro> response = ApiResponse.ok(
                 "Libro actualizado exitosamente",
                 newLibro
         );

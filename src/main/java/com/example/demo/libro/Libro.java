@@ -17,7 +17,7 @@ import java.util.Date;
 public class Libro {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.SEQUENCE)
+    @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column( nullable = false)
@@ -33,7 +33,7 @@ public class Libro {
     private String isbn;
 
     @Column( nullable = false)
-    @NotBlank( message= "El stock no puede estar vacío")
+    @NotNull( message= "El stock no puede estar vacío")
     private Integer stock;
 
     @Temporal(TemporalType.TIMESTAMP)
