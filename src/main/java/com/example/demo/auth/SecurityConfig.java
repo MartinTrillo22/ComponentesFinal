@@ -17,7 +17,7 @@ public class SecurityConfig {
     http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                    .anyRequest().permitAll()  // ← TEMPORAL: permite todo
+                    .anyRequest().permitAll()
             );
     return http.build();
   }
