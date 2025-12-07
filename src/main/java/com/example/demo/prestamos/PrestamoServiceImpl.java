@@ -1,5 +1,9 @@
 package com.example.demo.prestamos;
 
+import com.example.demo.exception.PedidoEstadoDevueltoException;
+import com.example.demo.exception.RecursoNoEncontradoException;
+import com.example.demo.exception.StockInsuficienteException;
+import com.example.demo.exception.UsuarioSuspendidoException;
 import com.example.demo.libro.Libro;
 import com.example.demo.libro.LibroService;
 import com.example.demo.usuarios.model.EstadoUsuario;
@@ -24,14 +28,14 @@ public class PrestamoServiceImpl implements PrestamoService{
   public Prestamo prestarLibro(Long libroId, Long usuarioId) {
     Libro libro=libroService.findById(libroId);
     Usuario usuario=usuarioRepo.findById(usuarioId).orElseThrow(()->
-      new RuntimeException("Usuario no encontrado con ID: "+usuarioId)
+      new RecursoNoEncontradoException("Usuario no encontrado con ID: "+usuarioId)
     );
 
     if(libro.getStock()<1){
-      throw new RuntimeException("No hay stock disponible para el libro con ID: "+libroId);
+      throw new StockInsuficienteException("No hay stock disponible para el libro con ID: "+libroId);
     }
     if(usuario.getEstado() == EstadoUsuario.SUSPENDIDO){
-      throw new RuntimeException("El usuario con ID: "+usuarioId+" está suspendido y no puede realizar préstamos.");
+      throw new UsuarioSuspendidoException("El usuario con ID: "+usuarioId+" está suspendido y no puede realizar préstamos.");
     }
 
     libro.setStock(libro.getStock()-1);
@@ -50,7 +54,7 @@ public class PrestamoServiceImpl implements PrestamoService{
   @Transactional
   public List<Prestamo> obtenerPrestamosPorUsuario(Long usuarioId) {
     Usuario usuario=usuarioRepo.findById(usuarioId).orElseThrow(()->
-      new RuntimeException("Usuario no encontrado con ID: "+usuarioId)
+      new RecursoNoEncontradoException("Usuario no encontrado con ID: "+usuarioId)
     );
     return usuario.getPrestamo();
   }
@@ -60,7 +64,7 @@ public class PrestamoServiceImpl implements PrestamoService{
   public Prestamo renovarPrestamo(Long prestamoId) {
     Prestamo prestamo=obtenerPrestamoPorId(prestamoId);
     if(prestamo.getEstado()==PedidoEstado.DEVUELTO){
-      throw new RuntimeException("El préstamo con ID: "+prestamoId+" ya ha sido devuelto y no puede ser renovado.");
+      throw new PedidoEstadoDevueltoException("El préstamo con ID: "+prestamoId+" ya ha sido devuelto y no puede ser renovado.");
     }
     prestamo.setFechaDevolucionEsperada(prestamo.getFechaDevolucionEsperada().plusDays(7));
     prestamo.setEstado(PedidoEstado.RENOVADO);
@@ -72,7 +76,7 @@ public class PrestamoServiceImpl implements PrestamoService{
   public void devolverLibro(Long prestamoId) {
     Prestamo prestamo=obtenerPrestamoPorId(prestamoId);
     if(prestamo.getEstado()==PedidoEstado.DEVUELTO){
-      throw new RuntimeException("El préstamo con ID: "+prestamoId+" ya ha sido devuelto.");
+      throw new PedidoEstadoDevueltoException("El préstamo con ID: "+prestamoId+" ya ha sido devuelto.");
     }
     Libro libro=prestamo.getLibro();
     libro.setStock(libro.getStock()+1);
@@ -83,7 +87,7 @@ public class PrestamoServiceImpl implements PrestamoService{
   @Override
   public Prestamo obtenerPrestamoPorId(Long prestamoId) {
     return prestamoRepo.findById(prestamoId).orElseThrow(()->
-      new RuntimeException("Préstamo no encontrado con ID: "+prestamoId)
+      new RecursoNoEncontradoException("Préstamo no encontrado con ID: "+prestamoId)
     );
   }
 
