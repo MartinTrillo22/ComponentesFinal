@@ -1,7 +1,8 @@
 package com.example.demo.libro;
 
 
-import jakarta.persistence.EntityNotFoundException;
+import com.example.demo.exception.IsbnDuplicadoException;
+import com.example.demo.exception.RecursoNoEncontradoException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +17,8 @@ public class LibroServiceImpl implements LibroService{
 
     @Override
     public Libro save(Libro libro) {
-        if( libroRepo.existsByTitulo(libro.getTitulo())){
-            throw new IllegalArgumentException("El libro ya existe");
-        }
-
         if( libroRepo.existsByIsbn(libro.getIsbn())){
-            throw new IllegalArgumentException("El ISBN ya existe");
-        }
-
-        if( libroRepo.existsByAutor(libro.getAutor())){
-            throw new IllegalArgumentException("El autor ya existe");
+            throw new IsbnDuplicadoException("Ya existe un libro con el ISBN: " + libro.getIsbn());
         }
         return libroRepo.save(libro);
     }
@@ -33,7 +26,7 @@ public class LibroServiceImpl implements LibroService{
     @Override
     public Libro findById(Long id) {
         return libroRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Libro no encontrado con id: " + id));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + id));
 
     }
 
@@ -46,17 +39,10 @@ public class LibroServiceImpl implements LibroService{
     public Libro update(Long id, Libro libro) {
         Libro libroExistente = findById(id);
 
-        if( libroRepo.existsByTituloAndIdNot(libro.getTitulo(), id)){
-            throw new IllegalArgumentException("El libro ya existe");
-        }
-
         if( libroRepo.existsByIsbnAndIdNot(libro.getIsbn(), id)){
-            throw new IllegalArgumentException("El ISBN ya existe");
+            throw new IsbnDuplicadoException("Ya existe un libro con el ISBN: " + libro.getIsbn());
         }
 
-        if( libroRepo.existsByAutorAndIdNot(libro.getAutor(), id)){
-            throw new IllegalArgumentException("El autor ya existe");
-        }
 
         libroExistente.setTitulo(libro.getTitulo());
         libroExistente.setIsbn(libro.getIsbn());
