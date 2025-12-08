@@ -35,6 +35,10 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(IsbnDuplicadoException.class)
   public ResponseEntity<ApiResponse<Void>> handleIsbnDuplicado(IsbnDuplicadoException ex){
+    ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+  }
+
   @ExceptionHandler(EmailDuplicadoException.class)
   public ResponseEntity<ApiResponse<Void>> handleEmailDuplicado(EmailDuplicadoException ex){
     ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);
