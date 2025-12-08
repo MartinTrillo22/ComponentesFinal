@@ -5,6 +5,7 @@ import com.example.demo.exception.RolNoEncontradoException;
 import com.example.demo.usuarios.model.Rol;
 import com.example.demo.usuarios.repository.RolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ public class RolServiceImpl implements RolService {
     private RolRepository rolRepository;
 
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public Rol crearRol(String nombre, String descripcion) {
         if (rolRepository.existsByNombre(nombre)) {
             throw new EmailDuplicadoException("El rol ya existe: " + nombre);
@@ -28,23 +30,27 @@ public class RolServiceImpl implements RolService {
     }
 
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public Rol obtenerRolPorId(Long id) {
         return rolRepository.findById(id)
                 .orElseThrow(() -> new RolNoEncontradoException("Rol no encontrado con id: " + id));
     }
 
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public Rol obtenerRolPorNombre(String nombre) {
         return rolRepository.findByNombre(nombre)
                 .orElseThrow(() -> new RolNoEncontradoException("Rol no encontrado con nombre: " + nombre));
     }
 
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public List<Rol> obtenerTodosLosRoles() {
         return rolRepository.findAll();
     }
 
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public Rol actualizarRol(Long id, String nombre, String descripcion) {
         Rol rol = obtenerRolPorId(id);
 
@@ -63,6 +69,7 @@ public class RolServiceImpl implements RolService {
     }
 
     @Override
+    @PreAuthorize( "hasRole('ADMIN')" )
     public void eliminarRol(Long id) {
         if (!rolRepository.existsById(id)) {
             throw new RolNoEncontradoException("Rol no encontrado con id: " + id);

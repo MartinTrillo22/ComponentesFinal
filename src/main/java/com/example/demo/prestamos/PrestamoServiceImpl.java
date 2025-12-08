@@ -12,6 +12,7 @@ import com.example.demo.usuarios.model.Usuario;
 import com.example.demo.usuarios.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -62,6 +63,7 @@ public class PrestamoServiceImpl implements PrestamoService{
 
   @Override
   @Transactional
+  @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
   public List<Prestamo> obtenerPrestamosPorUsuario(Long usuarioId) {
     Usuario usuario=usuarioRepo.findById(usuarioId).orElseThrow(()->
       new RecursoNoEncontradoException("Usuario no encontrado con ID: "+usuarioId)
@@ -71,6 +73,7 @@ public class PrestamoServiceImpl implements PrestamoService{
 
   @Override
   @Transactional
+  @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
   public Prestamo renovarPrestamo(Long prestamoId) {
     Prestamo prestamo=obtenerPrestamoPorId(prestamoId);
     if(prestamo.getEstado()==PedidoEstado.DEVUELTO){
@@ -83,6 +86,7 @@ public class PrestamoServiceImpl implements PrestamoService{
 
   @Override
   @Transactional
+  @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
   public void devolverLibro(Long prestamoId) {
     Prestamo prestamo=obtenerPrestamoPorId(prestamoId);
     if(prestamo.getEstado()==PedidoEstado.DEVUELTO){
@@ -95,6 +99,7 @@ public class PrestamoServiceImpl implements PrestamoService{
   }
 
   @Override
+  @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
   public Prestamo obtenerPrestamoPorId(Long prestamoId) {
     return prestamoRepo.findById(prestamoId).orElseThrow(()->
       new RecursoNoEncontradoException("Préstamo no encontrado con ID: "+prestamoId)
@@ -102,6 +107,7 @@ public class PrestamoServiceImpl implements PrestamoService{
   }
 
   @Override
+  @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
   public List<Prestamo> obtenerTodosLosPrestamos() {
     return prestamoRepo.findAll();
   }

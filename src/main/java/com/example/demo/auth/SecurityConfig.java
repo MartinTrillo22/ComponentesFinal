@@ -1,6 +1,8 @@
 package com.example.demo.auth;
 
 import com.example.demo.auth.jwt.JwtAuthenticationFilter;
+import com.example.demo.exception.CustomAccessDeniedHandler;
+import com.example.demo.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,20 +24,24 @@ public class SecurityConfig {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationEntryPoint authEntryPoint,
+                                         CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
     http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                    .requestMatchers("/public/*").permitAll()
-                    .requestMatchers("/v1/usuarios/*").hasRole("ADMIN")
-                    .requestMatchers("/v1/roles/*").hasRole("ADMIN")
-                    .requestMatchers("/v1/libros/*").hasAnyRole("ADMIN","GESTOR_INVENTARIO","BIBLIOTECARIO")
-                    .requestMatchers("/v1/prestamos/*").hasAnyRole("ADMIN","BIBLIOTECARIO")
+                    .requestMatchers("/public/**").permitAll()
+                    .requestMatchers("/v1/usuarios/**").hasRole("ADMIN")
+                    .requestMatchers("/v1/roles/**").hasRole("ADMIN")
+                    .requestMatchers("/v1/libros/**").hasAnyRole("ADMIN","GESTOR_INVENTARIO","BIBLIOTECARIO")
+                    .requestMatchers("/v1/prestamos/**").hasAnyRole("ADMIN","BIBLIOTECARIO")
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-
+            .exceptionHandling(ex -> ex
+                    .authenticationEntryPoint(authEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler)
+            )
     ;
     return http.build();
   }
