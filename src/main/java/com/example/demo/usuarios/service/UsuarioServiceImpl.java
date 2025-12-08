@@ -1,5 +1,8 @@
 package com.example.demo.usuarios.service;
 
+import com.example.demo.exception.EmailDuplicadoException;
+import com.example.demo.exception.RolNoEncontradoException;
+import com.example.demo.exception.UsuarioNoEncontradoException;
 import com.example.demo.usuarios.dto.UsuarioRequestDTO;
 import com.example.demo.usuarios.dto.UsuarioResponseDTO;
 import com.example.demo.usuarios.dto.UsuarioUpdateDTO;
@@ -35,7 +38,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioResponseDTO crearUsuario(UsuarioRequestDTO request) {
         if (usuarioRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new EmailDuplicadoException("El email ya está registrado: " + request.getEmail());
         }
 
         Usuario usuario = new Usuario();
@@ -50,7 +53,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         Set<Rol> roles = new HashSet<>();
         for (Long rolId : request.getRolesIds()) {
             Rol rol = rolRepository.findById(rolId)
-                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con id: " + rolId));
+                    .orElseThrow(() -> new RolNoEncontradoException("Rol no encontrado con id: " + rolId));
             roles.add(rol);
         }
         usuario.setRoles(roles);
@@ -62,14 +65,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioResponseDTO obtenerUsuarioPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con id: " + id));
         return convertirADTO(usuario);
     }
 
     @Override
     public UsuarioResponseDTO obtenerUsuarioPorEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con email: " + email));
         return convertirADTO(usuario);
     }
 
@@ -90,7 +93,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioResponseDTO actualizarUsuario(Long id, UsuarioUpdateDTO update) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con id: " + id));
 
         if (update.getNombre() != null) {
             usuario.setNombre(update.getNombre());
@@ -108,7 +111,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             Set<Rol> roles = new HashSet<>();
             for (Long rolId : update.getRolesIds()) {
                 Rol rol = rolRepository.findById(rolId)
-                        .orElseThrow(() -> new RuntimeException("Rol no encontrado con id: " + rolId));
+                        .orElseThrow(() -> new RolNoEncontradoException("Rol no encontrado con id: " + rolId));
                 roles.add(rol);
             }
             usuario.setRoles(roles);
@@ -121,7 +124,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void eliminarUsuario(Long id) {
         if (!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("Usuario no encontrado con id: " + id);
+            throw new UsuarioNoEncontradoException("Usuario no encontrado con id: " + id);
         }
         usuarioRepository.deleteById(id);
     }
@@ -129,7 +132,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void cambiarEstadoUsuario(Long id, EstadoUsuario nuevoEstado) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con id: " + id));
         usuario.setEstado(nuevoEstado);
         usuarioRepository.save(usuario);
     }

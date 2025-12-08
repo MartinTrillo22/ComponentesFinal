@@ -35,8 +35,34 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(IsbnDuplicadoException.class)
   public ResponseEntity<ApiResponse<Void>> handleIsbnDuplicado(IsbnDuplicadoException ex){
+  @ExceptionHandler(EmailDuplicadoException.class)
+  public ResponseEntity<ApiResponse<Void>> handleEmailDuplicado(EmailDuplicadoException ex){
     ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);
     return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+  }
+
+  @ExceptionHandler(UsuarioNoEncontradoException.class)
+  public ResponseEntity<ApiResponse<String>> handleUsuarioNoEncontrado(UsuarioNoEncontradoException ex){
+    ApiResponse<String> response=ApiResponse.of(ex.getMessage(),null);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+  }
+
+  @ExceptionHandler(RolNoEncontradoException.class)
+  public ResponseEntity<ApiResponse<String>> handleRolNoEncontrado(RolNoEncontradoException ex){
+    ApiResponse<String> response=ApiResponse.of(ex.getMessage(),null);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+  }
+
+  @ExceptionHandler(EstadoUsuarioInvalidoException.class)
+  public ResponseEntity<ApiResponse<Void>> handleEstadoUsuarioInvalido(EstadoUsuarioInvalidoException ex){
+    ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+  }
+
+  @ExceptionHandler(DatosInvalidosException.class)
+  public ResponseEntity<ApiResponse<Void>> handleDatosInvalidos(DatosInvalidosException ex){
+    ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
 }
