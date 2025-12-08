@@ -1,6 +1,7 @@
 package com.example.demo.usuarios.model;
 
 import com.example.demo.prestamos.Prestamo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -62,6 +63,7 @@ public class Usuario {
     private Set<Rol> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("usuario-prestamos")
     private List<Prestamo> prestamo= new ArrayList<>();
 
     public Usuario() {

@@ -3,6 +3,7 @@ package com.example.demo.prestamos;
 import com.example.demo.exception.PedidoEstadoDevueltoException;
 import com.example.demo.exception.RecursoNoEncontradoException;
 import com.example.demo.exception.StockInsuficienteException;
+import com.example.demo.exception.UsuarioNoEstudianteException;
 import com.example.demo.exception.UsuarioSuspendidoException;
 import com.example.demo.libro.Libro;
 import com.example.demo.libro.LibroService;
@@ -30,6 +31,15 @@ public class PrestamoServiceImpl implements PrestamoService{
     Usuario usuario=usuarioRepo.findById(usuarioId).orElseThrow(()->
       new RecursoNoEncontradoException("Usuario no encontrado con ID: "+usuarioId)
     );
+
+    // Verificar que el usuario tenga el rol ESTUDIANTE
+    boolean esEstudiante = usuario.getRoles().stream()
+      .anyMatch(rol -> rol.getNombre().equalsIgnoreCase("ROL_ESTUDIANTE") ||
+                       rol.getNombre().equalsIgnoreCase("ESTUDIANTE"));
+
+    if(!esEstudiante){
+      throw new UsuarioNoEstudianteException("Solo los usuarios con rol ESTUDIANTE pueden realizar préstamos. Usuario ID: "+usuarioId);
+    }
 
     if(libro.getStock()<1){
       throw new StockInsuficienteException("No hay stock disponible para el libro con ID: "+libroId);

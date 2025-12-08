@@ -69,4 +69,10 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
+  @ExceptionHandler(UsuarioNoEstudianteException.class)
+  public ResponseEntity<ApiResponse<Void>> handleUsuarioNoEstudiante(UsuarioNoEstudianteException ex){
+    ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+  }
+
 }
