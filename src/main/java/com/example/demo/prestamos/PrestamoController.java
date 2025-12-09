@@ -1,6 +1,7 @@
 package com.example.demo.prestamos;
 
 import com.example.demo.prestamos.dto.PrestamoRequest;
+import com.example.demo.prestamos.dto.PrestamoResponseDto;
 import com.example.demo.shared.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,23 +16,23 @@ public class PrestamoController {
   private final PrestamoService prestamoService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Prestamo>>> obtenerTodosLosPrestamos() {
-      List<Prestamo> prestamos = prestamoService.obtenerTodosLosPrestamos();
-      ApiResponse<List<Prestamo>> response = ApiResponse.of("Prestamos obtenidos exitosamente", prestamos);
+    public ResponseEntity<ApiResponse<List<PrestamoResponseDto>>> obtenerTodosLosPrestamos() {
+      List<PrestamoResponseDto> prestamos = prestamoService.obtenerTodosLosPrestamos();
+      ApiResponse<List<PrestamoResponseDto>> response = ApiResponse.of("Prestamos obtenidos exitosamente", prestamos);
       return ResponseEntity.ok(response);
   }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Prestamo>> crearPrestamo(@RequestBody PrestamoRequest prestamo) {
-        Prestamo nuevoPrestamo = prestamoService.prestarLibro(prestamo.libroId(), prestamo.clienteId());
-        ApiResponse<Prestamo> response = ApiResponse.of("Prestamo creado exitosamente", nuevoPrestamo);
+    public ResponseEntity<ApiResponse<PrestamoResponseDto>> crearPrestamo(@RequestBody PrestamoRequest prestamo) {
+        PrestamoResponseDto nuevoPrestamo = prestamoService.prestarLibro(prestamo.libroId(), prestamo.clienteId());
+        ApiResponse<PrestamoResponseDto> response = ApiResponse.of("Prestamo creado exitosamente", nuevoPrestamo);
         return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Prestamo>> obtenerPrestamoPorId(@PathVariable Long id) {
-        Prestamo prestamo = prestamoService.obtenerPrestamoPorId(id);
-        ApiResponse<Prestamo> response = ApiResponse.of("Prestamo obtenido exitosamente", prestamo);
+    public ResponseEntity<ApiResponse<PrestamoResponseDto>> obtenerPrestamoPorId(@PathVariable Long id) {
+        PrestamoResponseDto prestamo = prestamoService.obtenerPrestamoPorId(id);
+        ApiResponse<PrestamoResponseDto> response = ApiResponse.of("Prestamo obtenido exitosamente", prestamo);
         return ResponseEntity.ok(response);
     }
 

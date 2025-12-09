@@ -38,7 +38,8 @@ public class Prestamo {
   @JoinColumn(name = "usuario_id", nullable = false)
   private Usuario usuario;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "libro_id", nullable = false)
   private Libro libro;
+
 }

@@ -1,5 +1,6 @@
 package com.example.demo.usuarios.service;
 
+import com.example.demo.auth.dto.RegistroDto;
 import com.example.demo.usuarios.dto.UsuarioRequestDTO;
 import com.example.demo.usuarios.dto.UsuarioResponseDTO;
 import com.example.demo.usuarios.dto.UsuarioUpdateDTO;
@@ -30,4 +31,6 @@ public interface UsuarioService {
     void activarUsuario(Long id);
 
     List<UsuarioResponseDTO> obtenerUsuariosPorRol(String nombreRol);
+
+    UsuarioResponseDTO registroExterno(RegistroDto registroDto);
 }
