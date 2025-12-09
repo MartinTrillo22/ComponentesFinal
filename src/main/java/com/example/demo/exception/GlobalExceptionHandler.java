@@ -32,6 +32,12 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
   }
 
+  @ExceptionHandler(PrestamoNoDevueltoException.class)
+  public ResponseEntity<ApiResponse<Void>> handlePrestamoNoDevuelto(PrestamoNoDevueltoException ex){
+    ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+  }
+
   @ExceptionHandler(PedidoEstadoDevueltoException.class)
   public ResponseEntity<ApiResponse<Void>> handlePedidoEstadoDevuelto(PedidoEstadoDevueltoException ex){
     ApiResponse<Void> response=ApiResponse.of(ex.getMessage(),null);

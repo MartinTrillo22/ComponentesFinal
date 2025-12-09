@@ -1,9 +1,6 @@
 package com.example.demo.prestamos;
 
-import com.example.demo.exception.PedidoEstadoDevueltoException;
-import com.example.demo.exception.RecursoNoEncontradoException;
-import com.example.demo.exception.UsuarioNoEstudianteException;
-import com.example.demo.exception.UsuarioSuspendidoException;
+import com.example.demo.exception.*;
 import com.example.demo.libro.Libro;
 import com.example.demo.libro.LibroService;
 import com.example.demo.prestamos.dto.PrestamoResponseDto;
@@ -46,6 +43,15 @@ public class PrestamoServiceImpl implements PrestamoService{
       throw new UsuarioSuspendidoException("El usuario con ID: "+usuarioId+" está suspendido y no puede realizar préstamos.");
     }
 
+    boolean prestamoNodevuelto= usuario.getPrestamo().stream().anyMatch(prestamo -> {
+      String estado= prestamo.getEstado().name();
+      return estado.equalsIgnoreCase("ACTIVO") || estado.equalsIgnoreCase("RENOVADO")|| estado.equalsIgnoreCase("VENCIDO");
+    });
+
+    if(prestamoNodevuelto){
+      throw new PrestamoNoDevueltoException("El usuario con ID: "+usuarioId+" tiene un préstamo no devuelto y no puede realizar un nuevo préstamo.");
+    }
+
     libro.disminuirStock();
 
     Prestamo prestamo=new Prestamo();
@@ -81,6 +87,7 @@ public class PrestamoServiceImpl implements PrestamoService{
     }
     prestamo.setFechaDevolucionEsperada(prestamo.getFechaDevolucionEsperada().plusDays(7));
     prestamo.setEstado(PedidoEstado.RENOVADO);
+    prestamoRepo.save(prestamo);
     return toDTO(prestamo) ;
   }
 
@@ -99,6 +106,7 @@ public class PrestamoServiceImpl implements PrestamoService{
     libroService.save(libro);
     prestamo.setEstado(PedidoEstado.DEVUELTO);
     prestamo.setFechaDevolucionReal(LocalDateTime.now());
+    prestamoRepo.save(prestamo);
   }
 
   @Override
