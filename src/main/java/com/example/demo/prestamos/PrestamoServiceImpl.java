@@ -2,11 +2,11 @@ package com.example.demo.prestamos;
 
 import com.example.demo.exception.PedidoEstadoDevueltoException;
 import com.example.demo.exception.RecursoNoEncontradoException;
-import com.example.demo.exception.StockInsuficienteException;
 import com.example.demo.exception.UsuarioNoEstudianteException;
 import com.example.demo.exception.UsuarioSuspendidoException;
 import com.example.demo.libro.Libro;
 import com.example.demo.libro.LibroService;
+import com.example.demo.prestamos.dto.PrestamoResponseDto;
 import com.example.demo.usuarios.model.EstadoUsuario;
 import com.example.demo.usuarios.model.Usuario;
 import com.example.demo.usuarios.repository.UsuarioRepository;
@@ -27,7 +27,8 @@ public class PrestamoServiceImpl implements PrestamoService{
 
   @Override
   @Transactional
-  public Prestamo prestarLibro(Long libroId, Long usuarioId) {
+  @PreAuthorize("hasAnyRole('ADMIN','BIBLIOTECARIO','ESTUDIANTE')")
+  public PrestamoResponseDto prestarLibro(Long libroId, Long usuarioId) {
     Libro libro=libroService.findById(libroId);
     Usuario usuario=usuarioRepo.findById(usuarioId).orElseThrow(()->
       new RecursoNoEncontradoException("Usuario no encontrado con ID: "+usuarioId)
@@ -35,80 +36,95 @@ public class PrestamoServiceImpl implements PrestamoService{
 
     // Verificar que el usuario tenga el rol ESTUDIANTE
     boolean esEstudiante = usuario.getRoles().stream()
-      .anyMatch(rol -> rol.getNombre().equalsIgnoreCase("ROL_ESTUDIANTE") ||
-                       rol.getNombre().equalsIgnoreCase("ESTUDIANTE"));
+      .anyMatch(rol -> rol.getNombre().equalsIgnoreCase("ESTUDIANTE"));
 
     if(!esEstudiante){
       throw new UsuarioNoEstudianteException("Solo los usuarios con rol ESTUDIANTE pueden realizar préstamos. Usuario ID: "+usuarioId);
     }
 
-    if(libro.getStock()<1){
-      throw new StockInsuficienteException("No hay stock disponible para el libro con ID: "+libroId);
-    }
     if(usuario.getEstado() == EstadoUsuario.SUSPENDIDO){
       throw new UsuarioSuspendidoException("El usuario con ID: "+usuarioId+" está suspendido y no puede realizar préstamos.");
     }
 
-    libro.setStock(libro.getStock()-1);
+    libro.disminuirStock();
 
     Prestamo prestamo=new Prestamo();
     prestamo.setLibro(libro);
     prestamo.setUsuario(usuario);
     prestamo.setEstado(PedidoEstado.ACTIVO);
     prestamo.setFechaDevolucionEsperada(LocalDateTime.now().plusDays(7));
+
     prestamoRepo.save(prestamo);
 
-    return prestamo;
+    return toDTO(prestamo);
   }
 
   @Override
   @Transactional
   @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
-  public List<Prestamo> obtenerPrestamosPorUsuario(Long usuarioId) {
+  public List<PrestamoResponseDto> obtenerPrestamosPorUsuario(Long usuarioId) {
     Usuario usuario=usuarioRepo.findById(usuarioId).orElseThrow(()->
       new RecursoNoEncontradoException("Usuario no encontrado con ID: "+usuarioId)
     );
-    return usuario.getPrestamo();
+    return  usuario.getPrestamo().stream().map(this::toDTO).toList();
   }
 
   @Override
   @Transactional
   @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
-  public Prestamo renovarPrestamo(Long prestamoId) {
-    Prestamo prestamo=obtenerPrestamoPorId(prestamoId);
-    if(prestamo.getEstado()==PedidoEstado.DEVUELTO){
+  public PrestamoResponseDto renovarPrestamo(Long prestamoId) {
+    Prestamo prestamo=prestamoRepo.findById(prestamoId).orElseThrow(()->
+            new RecursoNoEncontradoException("Préstamo no encontrado con ID: "+prestamoId)
+    );
+    if(PedidoEstado.DEVUELTO.equals(prestamo.getEstado())){
       throw new PedidoEstadoDevueltoException("El préstamo con ID: "+prestamoId+" ya ha sido devuelto y no puede ser renovado.");
     }
     prestamo.setFechaDevolucionEsperada(prestamo.getFechaDevolucionEsperada().plusDays(7));
     prestamo.setEstado(PedidoEstado.RENOVADO);
-    return prestamo;
+    return toDTO(prestamo) ;
   }
 
   @Override
   @Transactional
   @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
   public void devolverLibro(Long prestamoId) {
-    Prestamo prestamo=obtenerPrestamoPorId(prestamoId);
-    if(prestamo.getEstado()==PedidoEstado.DEVUELTO){
+    Prestamo prestamo=prestamoRepo.findById(prestamoId).orElseThrow(()->
+            new RecursoNoEncontradoException("Préstamo no encontrado con ID: "+prestamoId)
+    );
+        if(PedidoEstado.DEVUELTO.equals(prestamo.getEstado())){
       throw new PedidoEstadoDevueltoException("El préstamo con ID: "+prestamoId+" ya ha sido devuelto.");
     }
     Libro libro=prestamo.getLibro();
-    libro.setStock(libro.getStock()+1);
+        libro.setStock(libro.getStock()+1);
+    libroService.save(libro);
     prestamo.setEstado(PedidoEstado.DEVUELTO);
     prestamo.setFechaDevolucionReal(LocalDateTime.now());
   }
 
   @Override
   @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
-  public Prestamo obtenerPrestamoPorId(Long prestamoId) {
-    return prestamoRepo.findById(prestamoId).orElseThrow(()->
-      new RecursoNoEncontradoException("Préstamo no encontrado con ID: "+prestamoId)
+  public PrestamoResponseDto obtenerPrestamoPorId(Long prestamoId) {
+    Prestamo prestamo= prestamoRepo.findById(prestamoId).orElseThrow(()->
+            new RecursoNoEncontradoException("Préstamo no encontrado con ID: "+prestamoId)
     );
+    return toDTO(prestamo);
   }
 
   @Override
   @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO')" )
-  public List<Prestamo> obtenerTodosLosPrestamos() {
-    return prestamoRepo.findAll();
+  public List<PrestamoResponseDto> obtenerTodosLosPrestamos() {
+    List<Prestamo> prestamos=prestamoRepo.findAll();
+    return prestamos.stream().map(this::toDTO).toList();
+  }
+
+  private PrestamoResponseDto toDTO(Prestamo prestamo) {
+    return new PrestamoResponseDto(
+            prestamo.getId(),
+            prestamo.getLibro().getId(),
+            prestamo.getUsuario().getId(),
+            prestamo.getFechaPrestamo().toString(),
+            prestamo.getFechaDevolucionEsperada().toString(),
+            prestamo.getEstado().name()
+            );
   }
 }

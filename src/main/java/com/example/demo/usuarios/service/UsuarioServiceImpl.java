@@ -1,5 +1,6 @@
 package com.example.demo.usuarios.service;
 
+import com.example.demo.auth.dto.RegistroDto;
 import com.example.demo.exception.EmailDuplicadoException;
 import com.example.demo.exception.RolNoEncontradoException;
 import com.example.demo.exception.UsuarioNoEncontradoException;
@@ -164,6 +165,22 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findByRoles_Nombre(nombreRol).stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public UsuarioResponseDTO registroExterno(RegistroDto registroDto){
+      Long rolId=rolRepository.findByNombre("ESTUDIANTE")
+              .orElseThrow(() -> new RolNoEncontradoException("Rol no encontrado: ESTUDIANTE")).getId();
+
+      UsuarioRequestDTO usuarioRequestDTO=new UsuarioRequestDTO(
+              registroDto.nombre(),
+              registroDto.email(),
+              registroDto.password(),
+              registroDto.telefono(),
+              null,
+              List.of(rolId)
+      );
+      return crearUsuario(usuarioRequestDTO);
     }
 
     private UsuarioResponseDTO convertirADTO(Usuario usuario) {

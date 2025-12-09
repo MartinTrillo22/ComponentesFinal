@@ -1,8 +1,11 @@
 package com.example.demo.auth;
 
 import com.example.demo.auth.dto.LoginDto;
+import com.example.demo.auth.dto.RegistroDto;
 import com.example.demo.auth.jwt.JwtService;
 import com.example.demo.shared.ApiResponse;
+import com.example.demo.usuarios.dto.UsuarioResponseDTO;
+import com.example.demo.usuarios.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,9 +24,10 @@ public class AuthController {
 
   private final JwtService jwtService;
   private final AuthenticationManager authenticationManager;
+  private final UsuarioService usuarioService;
 
   @PostMapping("/login")
-  public ResponseEntity<ApiResponse<String>> authenticate(@RequestBody LoginDto request) {
+  public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginDto request) {
 
     Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -38,5 +42,16 @@ public class AuthController {
     return ResponseEntity.ok(
             ApiResponse.of("Autenticación exitosa. Token generado.", jwtToken)
     );
+
   }
+  @PostMapping("/registro")
+  public ResponseEntity<ApiResponse<UsuarioResponseDTO>> registro(RegistroDto request) {
+
+    UsuarioResponseDTO responseDTO=usuarioService.registroExterno(request);
+
+    return ResponseEntity.ok(
+            ApiResponse.of("Registro exitoso.", responseDTO)
+    );
+  }
+
 }

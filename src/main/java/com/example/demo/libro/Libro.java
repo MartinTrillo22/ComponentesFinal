@@ -1,6 +1,7 @@
 package com.example.demo.libro;
 
 
+import com.example.demo.exception.StockInsuficienteException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -40,5 +41,15 @@ public class Libro {
     @Column( nullable = false)
     @NotNull( message = "La fecha de publicación no puede estar vacía")
     private Date fechaPublicacion;
+
+    public void verificarStock() {
+      if (stock < 1) {
+        throw new StockInsuficienteException("No hay stock disponible para el libro con ID: " + id);
+      }
+    }
+    public void disminuirStock(){
+      verificarStock();
+      this.stock-=1;
+    }
 
 }

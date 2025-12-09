@@ -1,12 +1,14 @@
 package com.example.demo.prestamos;
 
+import com.example.demo.prestamos.dto.PrestamoResponseDto;
+
 import java.util.List;
 
 public interface PrestamoService {
-  Prestamo prestarLibro(Long libroId, Long usuarioId);
-  List<Prestamo> obtenerPrestamosPorUsuario(Long usuarioId);
-  Prestamo renovarPrestamo(Long prestamoId);
+  PrestamoResponseDto prestarLibro(Long libroId, Long usuarioId);
+  List<PrestamoResponseDto> obtenerPrestamosPorUsuario(Long usuarioId);
+  PrestamoResponseDto renovarPrestamo(Long prestamoId);
   void devolverLibro(Long prestamoId);
-  Prestamo obtenerPrestamoPorId(Long prestamoId);
-  List<Prestamo> obtenerTodosLosPrestamos();
+  PrestamoResponseDto obtenerPrestamoPorId(Long prestamoId);
+  List<PrestamoResponseDto> obtenerTodosLosPrestamos();
 }

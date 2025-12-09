@@ -27,7 +27,7 @@ public class LibroServiceImpl implements LibroService{
     }
 
     @Override
-    @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO','GESTOR_INVENTARIO')" )
+    @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO','GESTOR_INVENTARIO','ESTUDIANTE')" )
     public Libro findById(Long id) {
         return libroRepo.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + id));
@@ -35,7 +35,7 @@ public class LibroServiceImpl implements LibroService{
     }
 
     @Override
-    @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO','GESTOR_INVENTARIO')" )
+    @PreAuthorize( "hasAnyRole('ADMIN','BIBLIOTECARIO','GESTOR_INVENTARIO','ESTUDIANTE')" )
     public List<Libro> findAll() {
         return libroRepo.findAll();
     }

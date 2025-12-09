@@ -1,4 +1,4 @@
-package com.example.demo.auth;
+package com.example.demo.config;
 
 import com.example.demo.auth.jwt.JwtAuthenticationFilter;
 import com.example.demo.exception.CustomAccessDeniedHandler;
@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -34,8 +36,8 @@ public class SecurityConfig {
                     .requestMatchers("/public/**").permitAll()
                     .requestMatchers("/v1/usuarios/**").hasRole("ADMIN")
                     .requestMatchers("/v1/roles/**").hasRole("ADMIN")
-                    .requestMatchers("/v1/libros/**").hasAnyRole("ADMIN","GESTOR_INVENTARIO","BIBLIOTECARIO")
-                    .requestMatchers("/v1/prestamos/**").hasAnyRole("ADMIN","BIBLIOTECARIO")
+                    .requestMatchers("/v1/libros/**").hasAnyRole("ADMIN","GESTOR_INVENTARIO","BIBLIOTECARIO","ESTUDIANTE")
+                    .requestMatchers("/v1/prestamos/**").hasAnyRole("ADMIN","BIBLIOTECARIO","ESTUDIANTE")
                     .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(ex -> ex
