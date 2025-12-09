@@ -2,6 +2,7 @@ package com.example.demo.prestamos;
 
 import com.example.demo.exception.*;
 import com.example.demo.libro.Libro;
+import com.example.demo.libro.LibroRepo;
 import com.example.demo.libro.LibroService;
 import com.example.demo.prestamos.dto.PrestamoResponseDto;
 import com.example.demo.usuarios.model.EstadoUsuario;
@@ -20,6 +21,7 @@ public class PrestamoServiceImpl implements PrestamoService{
 
   private final PrestamoRepo prestamoRepo;
   private final LibroService libroService;
+  private final LibroRepo libroRepo;
   private final UsuarioRepository usuarioRepo;
 
   @Override
@@ -103,7 +105,7 @@ public class PrestamoServiceImpl implements PrestamoService{
     }
     Libro libro=prestamo.getLibro();
         libro.setStock(libro.getStock()+1);
-    libroService.save(libro);
+    libroRepo.save(libro);
     prestamo.setEstado(PedidoEstado.DEVUELTO);
     prestamo.setFechaDevolucionReal(LocalDateTime.now());
     prestamoRepo.save(prestamo);
